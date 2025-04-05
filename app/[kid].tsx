@@ -5,11 +5,11 @@ import {
   Text,
   FlatList,
   TextInput,
-  Button,
+  TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { GlobalStyles, Colors } from '@/constants/styles';
 
 export default function ChildProfile() {
   const { kid } = useLocalSearchParams();
@@ -69,41 +69,43 @@ export default function ChildProfile() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{kid}’s Ledger</Text>
-      <Text style={styles.balance}>Balance: ${getBalance()}</Text>
+    <View style={GlobalStyles.screenContainer}>
+      <Text style={GlobalStyles.title}>{kid}’s Ledger</Text>
+      <Text style={GlobalStyles.balanceText}>Balance: ${getBalance()}</Text>
 
       <TextInput
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
-        style={styles.input}
-        placeholderTextColor="#888"
+        style={GlobalStyles.input}
+        placeholderTextColor={Colors.subtext}
       />
       <TextInput
         placeholder="Amount (e.g. 1 or -5)"
         value={amount}
         onChangeText={setAmount}
         keyboardType="default"
-        style={styles.input}
-        placeholderTextColor="#888"
+        style={GlobalStyles.input}
+        placeholderTextColor={Colors.subtext}
       />
-      <Button title="Add Transaction" onPress={addTransaction} />
+      <TouchableOpacity style={GlobalStyles.button} onPress={addTransaction}>
+        <Text style={GlobalStyles.buttonText}>Add Transaction</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={transactions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.transaction}>
+          <View style={styles.transactionRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.transactionText}>{item.date}</Text>
-              <Text style={styles.transactionText}>{item.description}</Text>
+              <Text style={GlobalStyles.transactionText}>{item.date}</Text>
+              <Text style={GlobalStyles.transactionText}>{item.description}</Text>
             </View>
             <Text
               style={[
-                styles.transactionText,
+                GlobalStyles.transactionText,
                 {
-                  color: item.amount < 0 ? 'red' : 'green',
+                  color: item.amount < 0 ? Colors.negative : Colors.positive,
                   fontWeight: 'bold',
                   marginRight: 10,
                 },
@@ -113,14 +115,14 @@ export default function ChildProfile() {
             </Text>
             <Text
               onPress={() => deleteTransaction(item.id)}
-              style={{ color: 'gray', fontSize: 18 }}
+              style={{ color: Colors.subtext, fontSize: 18 }}
             >
               ❌
             </Text>
           </View>
         )}
         ListEmptyComponent={
-          <Text style={{ marginTop: 20, color: '#444' }}>No transactions yet.</Text>
+          <Text style={{ marginTop: 20, color: Colors.subtext }}>No transactions yet.</Text>
         }
       />
     </View>
@@ -128,27 +130,18 @@ export default function ChildProfile() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, flex: 1, backgroundColor: 'white' },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10, color: 'black' },
-  balance: { fontSize: 18, marginBottom: 20, color: 'black' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
+  transactionRow: {
+    backgroundColor: Colors.card,
+    borderRadius: 12,
+    padding: 12,
     marginBottom: 10,
-    borderRadius: 5,
-    backgroundColor: 'white',
-    color: 'black',
-  },
-  transaction: {
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  transactionText: {
-    color: 'black',
+    shadowColor: '#000',
+    shadowOpacity: 0.03,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 1,
   },
 });
