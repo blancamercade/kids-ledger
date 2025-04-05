@@ -2,8 +2,8 @@ import { View, Text, FlatList, Button } from 'react-native';
 import { useRouter } from 'expo-router';
 
 const kids = [
-  { id: 'emma', name: 'Emma' },
-  { id: 'alex', name: 'Neil' },
+  { id: 'Emma', name: 'Emma' },
+  { id: 'Neil', name: 'Neil' },
 ];
 
 export default function HomeScreen() {
