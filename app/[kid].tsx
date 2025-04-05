@@ -92,10 +92,31 @@ export default function ChildProfile() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, flex: 1 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10 },
-  balance: { fontSize: 18, marginBottom: 20 },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 8, marginBottom: 10, borderRadius: 5 },
+  container: {
+    padding: 20,
+    flex: 1,
+    backgroundColor: 'white', // Add this
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: 'black', // Add this
+  },
+  balance: {
+    fontSize: 18,
+    marginBottom: 20,
+    color: 'black', // Add this
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    marginBottom: 10,
+    borderRadius: 5,
+    backgroundColor: 'white', // Add this
+    color: 'black', // Add this
+  },
   transaction: {
     padding: 10,
     borderBottomWidth: 1,
