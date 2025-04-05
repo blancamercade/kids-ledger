@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { View, Text, FlatList, TextInput, Button, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ChildProfile() {
@@ -37,18 +45,23 @@ export default function ChildProfile() {
   }, [transactions]);
 
   const addTransaction = () => {
-    if (!description || !amount) return;
+    const numericAmount = parseFloat(amount);
+    if (!description || isNaN(numericAmount)) return;
 
     const newTransaction = {
       id: Date.now().toString(),
       date: new Date().toISOString().split('T')[0],
       description,
-      amount: parseFloat(amount),
+      amount: numericAmount,
     };
 
     setTransactions([newTransaction, ...transactions]);
     setDescription('');
     setAmount('');
+  };
+
+  const deleteTransaction = (id) => {
+    setTransactions(transactions.filter((t) => t.id !== id));
   };
 
   const getBalance = () => {
@@ -65,13 +78,15 @@ export default function ChildProfile() {
         value={description}
         onChangeText={setDescription}
         style={styles.input}
+        placeholderTextColor="#888"
       />
       <TextInput
-        placeholder="Amount"
+        placeholder="Amount (e.g. 1 or -5)"
         value={amount}
         onChangeText={setAmount}
-        keyboardType="numeric"
+        keyboardType="default"
         style={styles.input}
+        placeholderTextColor="#888"
       />
       <Button title="Add Transaction" onPress={addTransaction} />
 
@@ -80,48 +95,60 @@ export default function ChildProfile() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.transaction}>
-            <Text>{item.date}</Text>
-            <Text>{item.description}</Text>
-            <Text>{item.amount >= 0 ? `+$${item.amount}` : `-$${Math.abs(item.amount)}`}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.transactionText}>{item.date}</Text>
+              <Text style={styles.transactionText}>{item.description}</Text>
+            </View>
+            <Text
+              style={[
+                styles.transactionText,
+                {
+                  color: item.amount < 0 ? 'red' : 'green',
+                  fontWeight: 'bold',
+                  marginRight: 10,
+                },
+              ]}
+            >
+              {item.amount >= 0 ? `+$${item.amount}` : `-$${Math.abs(item.amount)}`}
+            </Text>
+            <Text
+              onPress={() => deleteTransaction(item.id)}
+              style={{ color: 'gray', fontSize: 18 }}
+            >
+              ❌
+            </Text>
           </View>
         )}
-        ListEmptyComponent={<Text style={{ marginTop: 20 }}>No transactions yet.</Text>}
+        ListEmptyComponent={
+          <Text style={{ marginTop: 20, color: '#444' }}>No transactions yet.</Text>
+        }
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    flex: 1,
-    backgroundColor: 'white', // Add this
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'black', // Add this
-  },
-  balance: {
-    fontSize: 18,
-    marginBottom: 20,
-    color: 'black', // Add this
-  },
+  container: { padding: 20, flex: 1, backgroundColor: 'white' },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10, color: 'black' },
+  balance: { fontSize: 18, marginBottom: 20, color: 'black' },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 8,
     marginBottom: 10,
     borderRadius: 5,
-    backgroundColor: 'white', // Add this
-    color: 'black', // Add this
+    backgroundColor: 'white',
+    color: 'black',
   },
   transaction: {
-    padding: 10,
+    paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  transactionText: {
+    color: 'black',
   },
 });
