@@ -173,9 +173,9 @@ export default function BucketsScreen() {
               style={[GlobalStyles.input, { flex: 2, marginRight: 8 }]}
             />
             <TextInput
-              value={item.amount.toString()}
-              onChangeText={(text) => updateBucket(item.id, 'amount', text)}
+              defaultValue={item.amount.toString()}
               keyboardType="numeric"
+              onEndEditing={(e) => updateBucket(item.id, 'amount', e.nativeEvent.text)}
               style={[GlobalStyles.input, { width: 80 }]}
             />
             <TouchableOpacity onPress={() => deleteBucket(item.id)}>
