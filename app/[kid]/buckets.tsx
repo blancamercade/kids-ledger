@@ -6,18 +6,24 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
+  Dimensions,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
 import { GlobalStyles, Colors } from '@/constants/styles';
+import { PieChart } from 'react-native-chart-kit';
 
 export default function BucketsScreen() {
   const { kid } = useLocalSearchParams();
   const [buckets, setBuckets] = useState([]);
   const [newBucketName, setNewBucketName] = useState('');
+  const [selectedBucket, setSelectedBucket] = useState(null);
+  const [editAmount, setEditAmount] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
 
   const storageKey = `buckets-${kid}`;
+  const chartColors = ['#00bfa6', '#ffcc00', '#ff8a65', '#7986cb', '#4dd0e1', '#a1887f'];
 
   useEffect(() => {
     const loadBuckets = async () => {
@@ -47,19 +53,14 @@ export default function BucketsScreen() {
 
   const updateBucket = (id, field, value) => {
     setBuckets((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, [field]: field === 'amount' ? parseFloat(value) || 0 : value } : b))
+      prev.map((b) =>
+        b.id === id ? { ...b, [field]: field === 'amount' ? parseFloat(value) || 0 : value } : b
+      )
     );
   };
 
   const deleteBucket = (id) => {
-    Alert.alert('Delete Bucket', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => setBuckets((prev) => prev.filter((b) => b.id !== id)),
-      },
-    ]);
+    setBuckets((prev) => prev.filter((b) => b.id !== id));
   };
 
   const addBucket = () => {
@@ -73,9 +74,57 @@ export default function BucketsScreen() {
     setNewBucketName('');
   };
 
+  const total = buckets.reduce((sum, b) => sum + b.amount, 0);
+
+  const openEditModal = (bucket) => {
+    setSelectedBucket(bucket);
+    setEditAmount(bucket.amount.toString());
+    setModalVisible(true);
+  };
+
+  const saveEditAmount = () => {
+    updateBucket(selectedBucket.id, 'amount', editAmount);
+    setModalVisible(false);
+  };
+
   return (
     <View style={GlobalStyles.screenContainer}>
       <Text style={GlobalStyles.title}>{kid}’s Buckets</Text>
+
+      {buckets.length > 0 && (
+        <View style={{ alignItems: 'center', marginVertical: 16 }}>
+          <PieChart
+            data={buckets.map((b, index) => ({
+              name: b.name,
+              population: b.amount,
+              color: chartColors[index % chartColors.length],
+              legendFontColor: Colors.text,
+              legendFontSize: 12,
+              onPress: () => openEditModal(b),
+            }))}
+            width={Dimensions.get('window').width - 40}
+            height={220}
+            chartConfig={{
+              backgroundColor: '#fff',
+              backgroundGradientFrom: '#fff',
+              backgroundGradientTo: '#fff',
+              color: () => Colors.primary,
+              propsForLabels: {
+                fontSize: '10',
+              },
+            }}
+            accessor="population"
+            backgroundColor="transparent"
+            paddingLeft="0"
+            center={[0, 0]}
+            absolute
+            hasLegend={true}
+          />
+          <Text style={{ position: 'absolute', fontSize: 18, fontWeight: 'bold', color: Colors.text }}>
+            ${total.toFixed(2)}
+          </Text>
+        </View>
+      )}
 
       <View style={styles.addRow}>
         <TextInput
@@ -115,6 +164,26 @@ export default function BucketsScreen() {
           <Text style={{ marginTop: 20, color: Colors.subtext }}>No buckets yet.</Text>
         }
       />
+
+      <Modal visible={modalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={GlobalStyles.title}>Edit "{selectedBucket?.name}"</Text>
+            <TextInput
+              value={editAmount}
+              onChangeText={setEditAmount}
+              keyboardType="numeric"
+              style={GlobalStyles.input}
+            />
+            <TouchableOpacity onPress={saveEditAmount} style={GlobalStyles.button}>
+              <Text style={GlobalStyles.buttonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginTop: 10 }}>
+              <Text style={{ color: Colors.subtext }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -138,5 +207,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: Colors.card,
+    padding: 20,
+    borderRadius: 16,
+    width: '100%',
   },
 });
