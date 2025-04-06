@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { GlobalStyles, Colors } from '@/constants/styles';
 
 export default function ChildProfile() {
   const { kid } = useLocalSearchParams();
+  const router = useRouter();
   const [transactions, setTransactions] = useState([]);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -72,6 +73,13 @@ export default function ChildProfile() {
     <View style={GlobalStyles.screenContainer}>
       <Text style={GlobalStyles.title}>{kid}’s Ledger</Text>
       <Text style={GlobalStyles.balanceText}>Balance: ${getBalance()}</Text>
+
+      <TouchableOpacity
+        onPress={() => router.push(`/${kid}/buckets`)}
+        style={[GlobalStyles.button, { marginBottom: 12 }]}
+      >
+        <Text style={GlobalStyles.buttonText}>View Buckets</Text>
+      </TouchableOpacity>
 
       <TextInput
         placeholder="Description"
