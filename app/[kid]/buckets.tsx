@@ -8,6 +8,8 @@ import {
   StyleSheet,
   Dimensions,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
@@ -17,20 +19,27 @@ import { PieChart } from 'react-native-chart-kit';
 export default function BucketsScreen() {
   const { kid } = useLocalSearchParams();
   const [buckets, setBuckets] = useState([]);
+  const [ledgerTotal, setLedgerTotal] = useState(0);
   const [newBucketName, setNewBucketName] = useState('');
   const [selectedBucket, setSelectedBucket] = useState(null);
   const [editAmount, setEditAmount] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
   const storageKey = `buckets-${kid}`;
+  const ledgerKey = `ledger-${kid}`;
   const chartColors = ['#00bfa6', '#ffcc00', '#ff8a65', '#7986cb', '#4dd0e1', '#a1887f'];
 
   useEffect(() => {
-    const loadBuckets = async () => {
+    const loadData = async () => {
       try {
-        const stored = await AsyncStorage.getItem(storageKey);
-        if (stored) {
-          setBuckets(JSON.parse(stored));
+        const ledgerData = await AsyncStorage.getItem(ledgerKey);
+        const parsedLedger = ledgerData ? JSON.parse(ledgerData) : [];
+        const total = parsedLedger.reduce((sum, t) => sum + t.amount, 0);
+        setLedgerTotal(total);
+
+        const storedBuckets = await AsyncStorage.getItem(storageKey);
+        if (storedBuckets) {
+          setBuckets(JSON.parse(storedBuckets));
         } else {
           const defaults = [
             { id: '1', name: 'Spend Now', amount: 0 },
@@ -41,10 +50,10 @@ export default function BucketsScreen() {
           setBuckets(defaults);
         }
       } catch (e) {
-        console.error('Error loading buckets', e);
+        console.error('Error loading data', e);
       }
     };
-    loadBuckets();
+    loadData();
   }, [kid]);
 
   useEffect(() => {
@@ -74,8 +83,6 @@ export default function BucketsScreen() {
     setNewBucketName('');
   };
 
-  const total = buckets.reduce((sum, b) => sum + b.amount, 0);
-
   const openEditModal = (bucket) => {
     setSelectedBucket(bucket);
     setEditAmount(bucket.amount.toString());
@@ -87,44 +94,59 @@ export default function BucketsScreen() {
     setModalVisible(false);
   };
 
+  const allocated = buckets.reduce((sum, b) => sum + b.amount, 0);
+  const unallocated = ledgerTotal - allocated;
+
+  const chartData = [
+    ...buckets.map((b, index) => ({
+      name: b.name,
+      population: b.amount,
+      color: chartColors[index % chartColors.length],
+      legendFontColor: Colors.text,
+      legendFontSize: 12,
+      onPress: () => openEditModal(b),
+    })),
+    {
+      name: 'Unallocated',
+      population: unallocated,
+      color: '#cccccc',
+      legendFontColor: Colors.text,
+      legendFontSize: 12,
+    },
+  ];
+
   return (
-    <View style={GlobalStyles.screenContainer}>
+    <KeyboardAvoidingView
+      style={GlobalStyles.screenContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <Text style={GlobalStyles.title}>{kid}’s Buckets</Text>
 
-      {buckets.length > 0 && (
-        <View style={{ alignItems: 'center', marginVertical: 16 }}>
-          <PieChart
-            data={buckets.map((b, index) => ({
-              name: b.name,
-              population: b.amount,
-              color: chartColors[index % chartColors.length],
-              legendFontColor: Colors.text,
-              legendFontSize: 12,
-              onPress: () => openEditModal(b),
-            }))}
-            width={Dimensions.get('window').width - 40}
-            height={220}
-            chartConfig={{
-              backgroundColor: '#fff',
-              backgroundGradientFrom: '#fff',
-              backgroundGradientTo: '#fff',
-              color: () => Colors.primary,
-              propsForLabels: {
-                fontSize: '10',
-              },
-            }}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="0"
-            center={[0, 0]}
-            absolute
-            hasLegend={true}
-          />
-          <Text style={{ position: 'absolute', fontSize: 18, fontWeight: 'bold', color: Colors.text }}>
-            ${total.toFixed(2)}
-          </Text>
-        </View>
-      )}
+      <View style={{ alignItems: 'center', marginVertical: 16 }}>
+        <PieChart
+          data={chartData}
+          width={Dimensions.get('window').width - 40}
+          height={220}
+          chartConfig={{
+            backgroundColor: '#fff',
+            backgroundGradientFrom: '#fff',
+            backgroundGradientTo: '#fff',
+            color: () => Colors.primary,
+            propsForLabels: {
+              fontSize: '10',
+            },
+          }}
+          accessor="population"
+          backgroundColor="transparent"
+          paddingLeft="0"
+          center={[0, 0]}
+          absolute
+          hasLegend={true}
+        />
+        <Text style={{ position: 'absolute', fontSize: 18, fontWeight: 'bold', color: Colors.text }}>
+          ${ledgerTotal.toFixed(2)}
+        </Text>
+      </View>
 
       <View style={styles.addRow}>
         <TextInput
@@ -142,6 +164,7 @@ export default function BucketsScreen() {
       <FlatList
         data={buckets}
         keyExtractor={(item) => item.id}
+        keyboardShouldPersistTaps="handled"
         renderItem={({ item }) => (
           <View style={styles.bucketCard}>
             <TextInput
@@ -184,7 +207,7 @@ export default function BucketsScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
