@@ -10,6 +10,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams } from 'expo-router';
@@ -63,7 +64,12 @@ export default function BucketsScreen() {
   const updateBucket = (id, field, value) => {
     setBuckets((prev) =>
       prev.map((b) =>
-        b.id === id ? { ...b, [field]: field === 'amount' ? parseFloat(value) || 0 : value } : b
+        b.id === id
+          ? {
+              ...b,
+              [field]: field === 'amount' ? parseFloat(value) || 0 : value,
+            }
+          : b
       )
     );
   };
@@ -119,77 +125,81 @@ export default function BucketsScreen() {
     <KeyboardAvoidingView
       style={GlobalStyles.screenContainer}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={80}
     >
-      <Text style={GlobalStyles.title}>{kid}’s Buckets</Text>
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <Text style={GlobalStyles.title}>{kid}’s Buckets</Text>
 
-      <View style={{ alignItems: 'center', marginVertical: 16 }}>
-        <PieChart
-          data={chartData}
-          width={Dimensions.get('window').width - 40}
-          height={220}
-          chartConfig={{
-            backgroundColor: '#fff',
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
-            color: () => Colors.primary,
-            propsForLabels: {
-              fontSize: '10',
-            },
-          }}
-          accessor="population"
-          backgroundColor="transparent"
-          paddingLeft="0"
-          center={[0, 0]}
-          absolute
-          hasLegend={true}
+        <View style={{ alignItems: 'center', marginVertical: 16 }}>
+          <PieChart
+            data={chartData}
+            width={Dimensions.get('window').width - 40}
+            height={220}
+            chartConfig={{
+              backgroundColor: '#fff',
+              backgroundGradientFrom: '#fff',
+              backgroundGradientTo: '#fff',
+              color: () => Colors.primary,
+              propsForLabels: { fontSize: '10' },
+            }}
+            accessor="population"
+            backgroundColor="transparent"
+            paddingLeft="0"
+            center={[0, 0]}
+            absolute
+            hasLegend
+          />
+          <Text style={{ position: 'absolute', fontSize: 18, fontWeight: 'bold', color: Colors.text }}>
+            ${ledgerTotal.toFixed(2)}
+          </Text>
+        </View>
+
+        <View style={styles.addRow}>
+          <TextInput
+            placeholder="New bucket name"
+            value={newBucketName}
+            onChangeText={setNewBucketName}
+            style={GlobalStyles.input}
+            placeholderTextColor={Colors.subtext}
+          />
+          <TouchableOpacity onPress={addBucket} style={GlobalStyles.button}>
+            <Text style={GlobalStyles.buttonText}>Add</Text>
+          </TouchableOpacity>
+        </View>
+
+        <FlatList
+          data={buckets}
+          keyExtractor={(item) => item.id}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({ item }) => (
+            <View style={styles.bucketCard}>
+              <TextInput
+                value={item.name}
+                onChangeText={(text) => updateBucket(item.id, 'name', text)}
+                style={[GlobalStyles.input, { flex: 2, marginRight: 8 }]}
+              />
+              <TextInput
+                value={item.amount.toString()}
+                keyboardType="numeric"
+                onChangeText={(text) => updateBucket(item.id, 'amount', text)}
+                style={[GlobalStyles.input, { width: 80 }]}
+              />
+              <TouchableOpacity onPress={() => deleteBucket(item.id)}>
+                <Text style={{ fontSize: 18, color: Colors.subtext, marginLeft: 10 }}>❌</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          ListEmptyComponent={
+            <Text style={{ marginTop: 20, color: Colors.subtext }}>No buckets yet.</Text>
+          }
         />
-        <Text style={{ position: 'absolute', fontSize: 18, fontWeight: 'bold', color: Colors.text }}>
-          ${ledgerTotal.toFixed(2)}
-        </Text>
-      </View>
+      </ScrollView>
 
-      <View style={styles.addRow}>
-        <TextInput
-          placeholder="New bucket name"
-          value={newBucketName}
-          onChangeText={setNewBucketName}
-          style={GlobalStyles.input}
-          placeholderTextColor={Colors.subtext}
-        />
-        <TouchableOpacity onPress={addBucket} style={GlobalStyles.button}>
-          <Text style={GlobalStyles.buttonText}>Add</Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={buckets}
-        keyExtractor={(item) => item.id}
-        keyboardShouldPersistTaps="handled"
-        renderItem={({ item }) => (
-          <View style={styles.bucketCard}>
-            <TextInput
-              value={item.name}
-              onChangeText={(text) => updateBucket(item.id, 'name', text)}
-              style={[GlobalStyles.input, { flex: 2, marginRight: 8 }]}
-            />
-            <TextInput
-              defaultValue={item.amount.toString()}
-              keyboardType="numeric"
-              onEndEditing={(e) => updateBucket(item.id, 'amount', e.nativeEvent.text)}
-              style={[GlobalStyles.input, { width: 80 }]}
-            />
-            <TouchableOpacity onPress={() => deleteBucket(item.id)}>
-              <Text style={{ fontSize: 18, color: Colors.subtext, marginLeft: 10 }}>❌</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        ListEmptyComponent={
-          <Text style={{ marginTop: 20, color: Colors.subtext }}>No buckets yet.</Text>
-        }
-      />
-
-      <Modal visible={modalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalContainer}>
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <KeyboardAvoidingView
+          style={styles.modalContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           <View style={styles.modalContent}>
             <Text style={GlobalStyles.title}>Edit "{selectedBucket?.name}"</Text>
             <TextInput
@@ -205,7 +215,7 @@ export default function BucketsScreen() {
               <Text style={{ color: Colors.subtext }}>Cancel</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </KeyboardAvoidingView>
   );
