@@ -45,6 +45,7 @@ export const GlobalStyles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: Colors.primary,
+    marginBottom: 12,
   },
   input: {
     backgroundColor: '#fff',
@@ -60,6 +61,7 @@ export const GlobalStyles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     alignItems: 'center',
+    marginBottom: 12,
   },
   buttonText: {
     color: '#fff',
