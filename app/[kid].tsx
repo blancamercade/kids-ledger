@@ -73,14 +73,6 @@ export default function ChildProfile() {
     <View style={GlobalStyles.screenContainer}>
       <Text style={GlobalStyles.title}>{kid}’s Ledger</Text>
       <Text style={GlobalStyles.balanceText}>Balance: ${getBalance()}</Text>
-
-      <TouchableOpacity
-        onPress={() => router.push(`/${kid}/buckets`)}
-        style={[GlobalStyles.button, { marginBottom: 12 }]}
-      >
-        <Text style={GlobalStyles.buttonText}>View Buckets</Text>
-      </TouchableOpacity>
-
       <TextInput
         placeholder="Description"
         value={description}
@@ -133,6 +125,12 @@ export default function ChildProfile() {
           <Text style={{ marginTop: 20, color: Colors.subtext }}>No transactions yet.</Text>
         }
       />
+      <TouchableOpacity 
+        onPress={() => router.push(`/${kid}/buckets`)} 
+        style={[GlobalStyles.button, { marginBottom: 12 }]}
+        >
+        <Text style={GlobalStyles.buttonText}>View Buckets</Text>
+      </TouchableOpacity>      
     </View>
   );
 }
