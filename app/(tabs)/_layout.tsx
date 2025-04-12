@@ -1,8 +1,8 @@
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import { useKid } from '@/context/KidContext';
+import { Home, Book, Wallet } from 'lucide-react-native';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -12,19 +12,18 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary, // Finny teal
+        tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.subtext,
         tabBarStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: Colors.card,
           borderTopWidth: 1,
           borderTopColor: Colors.border,
           height: 64,
           paddingBottom: 8,
-          paddingTop: 6,
+          paddingTop: 4,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
         },
       }}
     >
@@ -32,27 +31,21 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Home color={color} size={24} />,
         }}
       />
       <Tabs.Screen
         name="ledger"
         options={{
           title: 'Ledger',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Book color={color} size={24} />,
         }}
       />
       <Tabs.Screen
         name="buckets"
         options={{
           title: 'Buckets',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="wallet-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Wallet color={color} size={24} />,
         }}
       />
     </Tabs>
