@@ -11,6 +11,9 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { GlobalStyles, Colors } from '@/constants/styles';
+import { useKid } from '@/context/KidContext';
+
+const { setSelectedKid } = useKid();
 
 const STORAGE_KEY = 'kids-list';
 
@@ -78,7 +81,10 @@ export default function HomeScreen() {
           <View style={styles.kidRow}>
             <TouchableOpacity
               style={[GlobalStyles.button, { flex: 1 }]}
-              onPress={() => router.push(`/${item.id}`)}
+              onPress={() => {
+                setSelectedKid(item.id);
+                router.push('/ledger');
+              }}
             >
               <Text style={GlobalStyles.buttonText}>{item.name}</Text>
             </TouchableOpacity>
