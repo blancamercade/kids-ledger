@@ -13,12 +13,11 @@ import { useRouter } from 'expo-router';
 import { GlobalStyles, Colors } from '@/constants/styles';
 import { useKid } from '@/context/KidContext';
 
-const { setSelectedKid } = useKid();
-
 const STORAGE_KEY = 'kids-list';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { setSelectedKid } = useKid(); // ✅ called correctly here
   const [kids, setKids] = useState([]);
   const [newKid, setNewKid] = useState('');
 
