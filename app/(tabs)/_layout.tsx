@@ -12,14 +12,14 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
+        tabBarActiveTintColor: Colors.primary, // Finny teal
         tabBarInactiveTintColor: Colors.subtext,
         tabBarStyle: {
           backgroundColor: '#ffffff',
           borderTopWidth: 1,
           borderTopColor: Colors.border,
-          height: 60,
-          paddingBottom: 6,
+          height: 64,
+          paddingBottom: 8,
           paddingTop: 6,
         },
         tabBarLabelStyle: {
