@@ -13,8 +13,6 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: true,
-        headerTitle: selectedKid ? `${selectedKid}'s Account` : 'No Kid Selected',
       }}
     >
       <Tabs.Screen
