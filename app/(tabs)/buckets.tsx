@@ -140,30 +140,30 @@ export default function BucketsScreen() {
       <ScrollView keyboardShouldPersistTaps="handled">
         <Text style={GlobalStyles.title}>{selectedKid}’s Buckets</Text>
 
-        <View style={{ alignItems: 'center', marginVertical: 16 }}>
-          <PieChart
-            data={chartData}
-            width={Dimensions.get('window').width - 40}
-            height={220}
-            chartConfig={{
-              backgroundColor: '#fff',
-              backgroundGradientFrom: '#fff',
-              backgroundGradientTo: '#fff',
-              color: () => Colors.primary,
-              propsForLabels: { fontSize: '10' },
-            }}
+        <View style={{ alignItems: 'center', justifyContent: 'center', marginVertical: 16, paddingHorizontal: 20 }}>
+           <PieChart
+             data={chartData}
+             width={Dimensions.get('window').width - 40}
+             height={220}
+             chartConfig={{
+               backgroundColor: '#fff',
+               backgroundGradientFrom: '#fff',
+               backgroundGradientTo: '#fff',
+               color: () => Colors.primary,
+               propsForLabels: { fontSize: '10' },
+             }}
             accessor="population"
             backgroundColor="transparent"
-            paddingLeft="0"
+            paddingLeft="20"
             center={[0, 0]}
             absolute
             hasLegend
-          />
-          <Text style={{ position: 'absolute', fontSize: 18, fontWeight: 'bold', color: Colors.text }}>
-            ${ledgerTotal.toFixed(2)}
-          </Text>
+            />
+           <Text style={{ position: 'absolute', fontSize: 18, fontWeight: 'bold', color: Colors.text }}>
+              ${ledgerTotal.toFixed(2)}
+           </Text>
         </View>
-
+ 
         <View style={styles.addRow}>
           <TextInput
             placeholder="New bucket name"
